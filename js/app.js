@@ -78,4 +78,24 @@ $("themeBtn").onclick = () => {
   try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch(e){}
 };
 
-render(movies);
+function initMovieApp() {
+    const requiredIds = [
+        "count", "grid", "genres", "search",
+        "clear", "close", "modal", "detail", "themeBtn"
+    ];
+
+    const missing = requiredIds.filter(id => !document.getElementById(id));
+
+    if (missing.length > 0) {
+        console.error("Thiếu phần tử HTML:", missing.join(", "));
+        return;
+    }
+
+    render(movies);
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMovieApp);
+} else {
+    initMovieApp();
+}
