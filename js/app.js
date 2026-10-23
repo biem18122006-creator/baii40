@@ -79,3 +79,51 @@ $("themeBtn").onclick = () => {
 };
 
 render(movies);
+
+/* =========================================================
+   SỬA LỖI ẢNH: khi ảnh không tải được thì tự thử
+   (1) ảnh nằm ngoài thư mục images/ (cùng chỗ với index.html)
+   (2) các đuôi khác: .jpg .jpeg .png .webp .JPG
+   (3) cuối cùng dùng poster dự phòng có tên phim
+   Áp dụng cho TẤT CẢ ảnh trên trang (poster, ảnh bài 37, 38...)
+   ========================================================= */
+function suaAnh(img){
+  if (!img || img.tagName !== "IMG") return;
+  const src = img.getAttribute("src") || "";
+  if (src.startsWith("data:")) return;                       // poster dự phòng thì thôi
+
+  if (!img.dataset.ds) {                                      // lần lỗi đầu: lập danh sách ảnh cần thử
+    const goc = src;
+    const ten = goc.replace(/^.*\//, "").replace(/\.[^.]+$/, "");           // vd: phim1
+    const thuMuc = goc.includes("/") ? goc.slice(0, goc.lastIndexOf("/") + 1) : "";
+    const duoiGoc = (goc.match(/\.[^.\/]+$/) || [".jpg"])[0];
+    const duoi = [duoiGoc, ".jpg", ".jpeg", ".png", ".webp", ".JPG"];
+    const ds = [];
+    [thuMuc, ""].forEach(d => duoi.forEach(e => {
+      const u = d + ten + e;
+      if (u !== goc && !ds.includes(u)) ds.push(u);
+    }));
+    img.dataset.ds = JSON.stringify(ds);
+    img.dataset.n = "0";
+  }
+  const ds = JSON.parse(img.dataset.ds);
+  const n = Number(img.dataset.n);
+  if (n < ds.length) {
+    img.dataset.n = n + 1;
+    img.src = ds[n];
+  } else {
+    const ten = (img.alt || "Poster").replace("Poster ", "");
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"><rect width="400" height="600" fill="#334155"/>' +
+      '<text x="200" y="300" text-anchor="middle" font-family="Arial" font-size="30" fill="#fff">' +
+      ten.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '</text></svg>');
+  }
+}
+// bắt lỗi của mọi ảnh (kể cả ảnh vừa được JS tạo ra)
+document.addEventListener("error", e => { if (e.target && e.target.tagName === "IMG") suaAnh(e.target); }, true);
+// ảnh trong HTML tĩnh có thể đã lỗi trước khi script chạy -> quét lại
+function quetAnhLoi(){
+  document.querySelectorAll("img").forEach(i => { if (i.complete && i.naturalWidth === 0 && i.getAttribute("src")) suaAnh(i); });
+}
+quetAnhLoi();
+window.addEventListener("load", quetAnhLoi);
