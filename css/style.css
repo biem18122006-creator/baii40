@@ -20,7 +20,10 @@ body.dark-mode {
 }
 
 * { box-sizing: border-box; }
-body {
+
+<script src="./js/app.js"></script>
+</body>
+</html> body {
   margin: 0;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   background: var(--bg);
