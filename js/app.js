@@ -16,16 +16,33 @@ const movies = [
 const $ = id => document.getElementById(id);
 
 // hiển thị danh sách phim
-function render(list){
-  $("count").textContent = `Tìm thấy ${list.length} bộ phim`;
-  $("grid").innerHTML = list.length ? list.map(m => `
-    <div class="card" onclick="openModal(${m.id})">
-      <img class="poster" src="${m.poster}" alt="Poster ${m.title}">
-      <div class="info"><h4>${m.title}</h4>
-        <p>Năm phát hành: ${m.year}</p><p>⭐ ${m.rating}/10</p>
-        <p>${m.genres.join(" · ")}</p></div>
-    </div>`).join("") : "<p>Không có phim phù hợp.</p>";
+```javascript
+// Hiển thị danh sách phim và tự xử lý poster bị lỗi
+function render(list) {
+    $("count").textContent = `Tìm thấy ${list.length} bộ phim`;
+
+    $("grid").innerHTML = list.length
+        ? list.map(m => `
+            <div class="card" onclick="openModal(${m.id})">
+                <img
+                    class="poster"
+                    src="${m.poster}"
+                    alt="Poster ${m.title}"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1f33/ffffff?text=No+Poster';"
+                >
+
+                <div class="info">
+                    <h4>${m.title}</h4>
+                    <p>Năm phát hành: ${m.year}</p>
+                    <p>⭐ ${m.rating}/10</p>
+                    <p>${m.genres.join(" · ")}</p>
+                </div>
+            </div>
+        `).join("")
+        : "<p>Không có phim phù hợp.</p>";
 }
+```
 
 // checkbox thể loại tự sinh
 const allGenres = [...new Set(movies.flatMap(m => m.genres))].sort((a,b)=>a.localeCompare(b,"vi"));
@@ -51,16 +68,32 @@ $("clear").onclick = () => {
 
 // modal chi tiết phim
 function openModal(id){
-  const m = movies.find(x => x.id === id);
-  $("detail").innerHTML = `
-    <img class="poster" src="${m.poster}" alt="Poster ${m.title}">
-    <div><h2>${m.title} (${m.year})</h2>
-      ${m.genres.map(g => `<span class="tag">${g}</span>`).join("")}
-      <p>⭐ ${m.rating}/10</p><p>${m.desc}</p>
-      <p><b>Đạo diễn:</b> ${m.director}</p>
-      <p><b>Diễn viên:</b> ${m.cast.join(", ")}</p></div>`;
-  $("modal").classList.add("open");
+  ```javascript
+function openModal(id) {
+    const m = movies.find(x => x.id === id);
+    if (!m) return;
+
+    $("detail").innerHTML = `
+        <img
+            class="poster"
+            src="${m.poster}"
+            alt="Poster ${m.title}"
+            onerror="this.onerror=null; this.src='https://placehold.co/400x600/1a1f33/ffffff?text=No+Poster';"
+        >
+
+        <div>
+            <h2>${m.title} (${m.year})</h2>
+            ${m.genres.map(g => `<span class="tag">${g}</span>`).join("")}
+            <p>⭐ ${m.rating}/10</p>
+            <p>${m.desc}</p>
+            <p><b>Đạo diễn:</b> ${m.director}</p>
+            <p><b>Diễn viên:</b> ${m.cast.join(", ")}</p>
+        </div>
+    `;
+
+    $("modal").classList.add("open");
 }
+```
 const closeModal = () => $("modal").classList.remove("open");
 $("close").onclick = closeModal;
 $("modal").onclick = e => { if(e.target.id === "modal") closeModal(); };
